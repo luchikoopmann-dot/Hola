@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>tengo algo que preguntarte</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --red: #c8102e;
+      --red-dark: #8b0000;
+      --cream: #f5ede0;
+      --cream-dim: #e8ddd0;
+      --gold: #c9a84c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      overflow: hidden;
+      cursor: crosshair;
+      position: relative;
+    }
+
+    /* grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.4;
+    }
+
+    /* ambient glow */
+    .glow {
+      position: fixed;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,16,46,0.22) 0%, rgba(140,0,20,0.08) 50%, transparent 75%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.7; }
+    }
+
+    /* card */
+    .card {
+      position: relative;
+      z-index: 1;
+      width: min(480px, 92vw);
+      padding: 56px 48px 48px;
+      border: 1px solid rgba(200,16,46,0.3);
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(12px);
+      animation: fadeUp 0.9s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(201,168,76,0.15);
+      pointer-events: none;
+      margin: 6px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* corner marks */
+    .corner {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-color: var(--gold);
+      border-style: solid;
+      opacity: 0.5;
+    }
+    .corner.tl { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+    .corner.tr { top: 12px; right: 12px; border-width: 1px 1px 0 0; }
+    .corner.bl { bottom: 12px; left: 12px; border-width: 0 0 1px 1px; }
+    .corner.br { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: clamp(36px, 8vw, 52px);
+      font-weight: 600;
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 20px;
+      letter-spacing: -0.01em;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--red);
+    }
+
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--red), transparent);
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 17px;
+      color: rgba(245,237,224,0.6);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    /* buttons */
+    .btn-area {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      min-height: 52px;
+      position: relative;
+    }
+
+    .btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      padding: 16px 28px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .btn-yes {
+      background: var(--red);
+      color: var(--cream);
+      flex-shrink: 0;
+    }
+    .btn-yes:hover {
+      background: var(--red-dark);
+      letter-spacing: 0.28em;
+    }
+
+    .btn-no {
+      background: transparent;
+      color: rgba(245,237,224,0.3);
+      border: 1px solid rgba(245,237,224,0.15);
+      white-space: nowrap;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    /* success */
+    .success {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeUp 0.6s cubic-bezier(.16,1,.3,1) both;
+    }
+    .success.show { display: flex; }
+
+    .success .eyebrow { margin-bottom: 12px; color: var(--gold); }
+    .success h2 {
+      font-size: clamp(32px, 7vw, 46px);
+      font-weight: 600;
+      color: var(--cream);
+      line-height: 1.15;
+    }
+    .success h2 em { color: var(--red); font-style: italic; }
+    .success p { margin-bottom: 0; }
+
+    /* sparks canvas */
+    #sparks {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* no tooltip */
+    .tip {
+      position: fixed;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: rgba(245,237,224,0.4);
+      pointer-events: none;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .tip.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="glow"></div>
+<canvas id="sparks"></canvas>
+<div class="tip" id="tip">no disponible</div>
+
+<div class="card">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- Main -->
+  <div id="main">
+    <h1>tengo ganas<br>de verte.<br><em>¿estás?</em></h1>
+    <div class="divider"></div>
+    <p>vos y yo.</p>
+
+    <div class="btn-area" id="btnArea">
+      <button class="btn btn-yes" id="btnYes">sí, voy</button>
+      <button class="btn btn-no" id="btnNo">no puedo</button>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success" id="success">
+    <h2>sabía que<br><em>ibas a decir sí.</em></h2>
+    <div class="divider"></div>
+    <p>te escribo.<br>no llegues tarde.</p>
+  </div>
+</div>
+
+<script>
+  /* floating particles bg */
+  const sparksCanvas = document.getElementById('sparks');
+  const sCtx = sparksCanvas.getContext('2d');
+  sparksCanvas.width = window.innerWidth;
+  sparksCanvas.height = window.innerHeight;
+
+  const particles = Array.from({length: 35}, () => ({
+    x: Math.random() * sparksCanvas.width,
+    y: Math.random() * sparksCanvas.height,
+    r: 0.5 + Math.random() * 1.5,
+    speed: 0.15 + Math.random() * 0.3,
+    opacity: 0.1 + Math.random() * 0.25,
+    drift: (Math.random() - 0.5) * 0.3,
+  }));
+
+  function drawParticles() {
+    sCtx.clearRect(0, 0, sparksCanvas.width, sparksCanvas.height);
+    particles.forEach(p => {
+      p.y -= p.speed;
+      p.x += p.drift;
+      if (p.y < -4) { p.y = sparksCanvas.height + 4; p.x = Math.random() * sparksCanvas.width; }
+      sCtx.beginPath();
+      sCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      sCtx.fillStyle = `rgba(200,16,46,${p.opacity})`;
+      sCtx.fill();
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  /* NO button escape */
+  const btnNo = document.getElementById('btnNo');
+  const tip = document.getElementById('tip');
+  const msgs = ['no disponible','opción eliminada','error 404','intento fallido','no existe eso','señal perdida','try again :)'];
+  let noCount = 0;
+  let tipTimer;
+
+  function escapeBtnNo(cx, cy) {
+    noCount++;
+    let nx, ny, tries = 0;
+    do {
+      nx = 80 + Math.random() * (window.innerWidth - 200);
+      ny = 60 + Math.random() * (window.innerHeight - 100);
+      tries++;
+    } while (tries < 25 && Math.hypot(nx - cx, ny - cy) < 150);
+
+    btnNo.style.position = 'fixed';
+    btnNo.style.left = nx + 'px';
+    btnNo.style.top = ny + 'px';
+
+    const msg = msgs[Math.min(noCount - 1, msgs.length - 1)];
+    tip.textContent = msg;
+    tip.style.left = Math.min(cx + 12, window.innerWidth - 160) + 'px';
+    tip.style.top = (cy - 28) + 'px';
+    tip.classList.add('show');
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(() => tip.classList.remove('show'), 1200);
+  }
+
+  btnNo.addEventListener('mouseenter', e => escapeBtnNo(e.clientX, e.clientY));
+  btnNo.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    escapeBtnNo(t.clientX, t.clientY);
+  }, { passive: false });
+
+  /* YES button */
+  document.getElementById('btnYes').addEventListener('click', () => {
+    document.getElementById('main').style.display = 'none';
+    document.getElementById('success').classList.add('show');
+    btnNo.style.display = 'none';
+    tip.classList.remove('show');
+    burstSparks();
+  });
+
+  /* burst on yes */
+  function burstSparks() {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const burst = Array.from({length: 60}, () => ({
+      x: cx, y: cy,
+      vx: (Math.random() - 0.5) * 8,
+      vy: (Math.random() - 0.5) * 8 - 2,
+      r: 1 + Math.random() * 3,
+      life: 1,
+      decay: 0.02 + Math.random() * 0.025,
+    }));
+
+    function animateBurst() {
+      burst.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12;
+        p.life -= p.decay;
+        if (p.life <= 0) return;
+        sCtx.beginPath();
+        sCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        sCtx.fillStyle = `rgba(200,16,46,${p.life * 0.8})`;
+        sCtx.fill();
+      });
+      if (burst.some(p => p.life > 0)) requestAnimationFrame(animateBurst);
+    }
+    animateBurst();
+  }
+
+  window.addEventListener('resize', () => {
+    sparksCanvas.width = window.innerWidth;
+    sparksCanvas.height = window.innerHeight;
+  });
+</script>
+</body>
+</html>
